@@ -1,12 +1,27 @@
 <template>
-    <div>
-        <form @submit.prevent="submitForm()">
-            <input type="text" v-model="form.name" placeholder="Ex: Florian" />
-            <input type="text" v-model.number="form.age" placeholder="Ex: 28" />
+    <b-form class="my-5" @submit.prevent="submitForm()">
 
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+        <h3 class="text-dark">Add or edit user</h3>
+        
+        <b-container class="my-4" fluid>
+            <b-row>
+                <b-col>
+                    <b-input type="text" v-model="form.name" placeholder="Ex: Florian" />
+                </b-col>
+                <b-col>
+                    <b-input type="text" v-model.number="form.age" placeholder="Ex: 28" />
+                </b-col>
+                <b-col>
+                    <b-button 
+                        variant="primary"
+                        :class="{'active': verifyForm, 'disabled': !verifyForm}"
+                        type="submit">
+                        Submit
+                    </b-button>
+                </b-col>
+            </b-row>
+        </b-container>
+    </b-form>
 </template>
 
 <script lang="ts">
@@ -20,6 +35,7 @@ export default class UserFormComponent extends Vue {
     @Prop() user!: User;
 
     public form!: { name: string, age: number | null };
+    public errors!: string[];
 
     data() {
         return {
@@ -27,6 +43,7 @@ export default class UserFormComponent extends Vue {
                 name: "",
                 age: null,
             },
+            errors: []
         };
     }
 
@@ -50,11 +67,28 @@ export default class UserFormComponent extends Vue {
         };
     }
 
+    // COMPUTED
+
+    public get verifyForm(): boolean {
+        this.errors = [];
+
+        if (!(this.form.name)) {
+            this.errors.push('Name field is required!');
+        }
+        if (!this.form.age) {
+            this.errors.push('Age is required!');
+        }
+
+        return !(this.errors.length > 0);
+    }
+
     // METHODS
     
     public submitForm(): void {
-        this.formChange();
-        this.resetForm();
+        if (this.verifyForm) {
+            this.formChange();
+            this.resetForm();
+        }
     }
 
     public resetForm(): void {
@@ -63,23 +97,6 @@ export default class UserFormComponent extends Vue {
             age: null,
         };
     }
+
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-h3 {
-    margin: 40px 0 0;
-}
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-li {
-    display: inline-block;
-    margin: 0 10px;
-}
-a {
-    color: #42b983;
-}
-</style>
