@@ -1,27 +1,36 @@
 <template>
-    <div class="home">
-        <h1>{{ title }}</h1>
+    <b-container class="home">
 
-        <button @click="cleanSelected()">Unselect all</button>
+        <h1 class="text-center mt-3 text-dark">{{ title }}</h1>
 
         <UserListComponent
-            :title="'Liste 1'"
+            :title="firstListTitle"
             :user-list="userList"
             :selected-users="selectedUsers"
-            @selected="selectedChange($event)"
-            @editUserEvent="addUserToEdit($event)"
-        >
+            @selectedChanges="onSelectedChanges($event)"
+            @editUserChanges="onEditUserChanges($event)"
+            @clearSelected="cleanSelected()">
         </UserListComponent>
 
-        <br />
+        <button :class="{ 'active': !!selectedCount, 'disabled': !selectedCount }" class="btn btn-primary" @click="deleteUsers()">
+            <span v-if="selectedCount > 1">
+                Delete {{ selectedCount }} selected users
+            </span>
+            <span v-else-if="selectedCount === 1">
+                Delete {{selectedCount }} selected user
+            </span>
+            <span v-else>
+                No selected user to delete
+            </span>
+        </button>
+
         <UserFormComponent
             :user="user"
-            @formChange="changeUser($event)"
-        ></UserFormComponent>
-        <br />
+            @formChange="changeUser($event)">
+        </UserFormComponent>
 
-        <button @click="deleteUsers()">Delete user(s)</button>
-    </div>
+
+    </b-container>
 </template>
 
 <script lang="ts">
@@ -38,7 +47,6 @@ import { IKeyValue } from "../models/interfaces/key-value.interface";
     },
 })
 export default class Home extends Vue {
-
     public title!: string;
     public userList!: User[];
     public user!: User;
@@ -47,20 +55,25 @@ export default class Home extends Vue {
     data() {
         return {
             title: "Listes d'utilisateurs",
+            firstListTitle: "First list",
             userList: [
                 { name: "Florian", age: 28, id: this.getRndInteger() },
                 { name: "Gwen", age: 31, id: this.getRndInteger() },
                 { name: "Matthias", age: 28, id: this.getRndInteger() },
                 { name: "Patty", age: 29, id: this.getRndInteger() },
             ],
-            user: new User({ name: "Jules", age: 29, id: this.getRndInteger() }),
+            user: new User({}),
             selectedUsers: {},
         };
     }
 
+    public get selectedCount(): number {
+        return Object.keys({...this.selectedUsers}).filter(key=> this.selectedUsers[key]).length
+    }
+
     // METHODS
 
-    public selectedChange(newSelectedUsers: IKeyValue): void {
+    public onSelectedChanges(newSelectedUsers: IKeyValue): void {
         this.selectedUsers = { ...newSelectedUsers };
     }
 
@@ -91,7 +104,7 @@ export default class Home extends Vue {
         }
     }
 
-    public addUserToEdit(userToEdit: User): void {
+    public onEditUserChanges(userToEdit: User): void {
         this.user = new User({ ...userToEdit });
     }
 
@@ -116,7 +129,9 @@ export default class Home extends Vue {
     }
 
     private isUserAlreadyExist(newUser: User): boolean {
-        const alreadyExist = !!this.userList.find((user) => user.name == newUser.name && user.age == newUser.age);
+        const alreadyExist = !!this.userList.find(
+            (user) => user.name == newUser.name && user.age == newUser.age
+        );
         return alreadyExist;
     }
 }
