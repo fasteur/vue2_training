@@ -4,7 +4,7 @@
 
         <b-table class="mx-1" striped hover :fields="fields" :items="userList">
 
-            <template #head(checkbox)>
+            <!-- <template #head(checkbox)>
                     <button class="btn btn-outline-primary btn-sm" @click="clearSelected()">Clear</button>
             </template>
             <template #cell(checkbox)="data">
@@ -15,11 +15,15 @@
                     id="user.id"
                     @change="selectUser($event, data.item.id)"
                 />
+            </template> -->
+
+            <template #cell(editAndDelete)="data">
+                <div class="d-flex flex-row justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm mr-2" type="button" @click="editUserChanges(data.item)">Edit</button>
+                    <button class="btn btn-outline-primary btn-sm mr-2" type="button" @click="deleteUserChanges(data.item)">Delete</button>
+                </div>
             </template>
 
-            <template #cell(edit)="data">
-                <button class="btn btn-outline-primary btn-sm" type="button" @click="editUser(data.item)">Edit</button>
-            </template>
         </b-table>
     </div>
 </template>
@@ -41,17 +45,17 @@ export default class UserListComponent extends Vue {
     data() {
         return {
             fields: [
-                'checkbox',
+                // 'checkbox',
                 { key: 'name', sortable: true },
                 { key: 'age', sortable: true },
-                { key: 'edit', label: '' }
+                { key: 'editAndDelete', label: '' }
             ]
         }
     }
 
     @Emit("editUserChanges")
     public editUserChanges(user: User): User {
-        return new User({ ...user });
+        return user;
     }
 
     @Emit("selectedChanges")
@@ -59,9 +63,9 @@ export default class UserListComponent extends Vue {
         return { ...newSelectedUsers };
     }
 
-    @Emit("clearSelected")
-    public clearSelected() {
-        return;
+    @Emit("deleteUserChanges")
+    public deleteUserChanges(user: User): User {
+        return user;
     }
 
     public selectUser(event: any, userId: string): void {
@@ -72,8 +76,5 @@ export default class UserListComponent extends Vue {
         this.selectedChanges(newSelectedUsers);
     }
 
-    public editUser(user: User): void {
-        this.editUserChanges(user);
-    }
 }
 </script>

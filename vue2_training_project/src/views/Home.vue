@@ -1,6 +1,5 @@
 <template>
     <b-container class="home">
-
         <h1 class="text-center mt-3 text-dark">{{ title }}</h1>
 
         <UserListComponent
@@ -8,28 +7,28 @@
             :user-list="userList"
             :selected-users="selectedUsers"
             @selectedChanges="onSelectedChanges($event)"
-            @editUserChanges="onEditUserChanges($event)"
-            @clearSelected="cleanSelected()">
+            @editUserChanges="onEditUser($event)"
+            @deleteUserChanges="onDeleteUser($event)"
+            @clearSelected="cleanSelected()"
+        >
         </UserListComponent>
 
-        <button :class="{ 'active': !!selectedCount, 'disabled': !selectedCount }" class="btn btn-primary" @click="deleteUsers()">
+        <!-- <button
+            :class="{ active: !!selectedCount, disabled: !selectedCount }"
+            class="btn btn-primary"
+            @click="deleteUsers()"
+        >
             <span v-if="selectedCount > 1">
                 Delete {{ selectedCount }} selected users
             </span>
             <span v-else-if="selectedCount === 1">
-                Delete {{selectedCount }} selected user
+                Delete {{ selectedCount }} selected user
             </span>
-            <span v-else>
-                No selected user to delete
-            </span>
-        </button>
+            <span v-else> No selected user to delete </span>
+        </button> -->
 
-        <UserFormComponent
-            :user="user"
-            @formChange="changeUser($event)">
+        <UserFormComponent :user="user" @formChange="changeUser($event)">
         </UserFormComponent>
-
-
     </b-container>
 </template>
 
@@ -38,7 +37,10 @@ import { Component, Vue } from "vue-property-decorator";
 import UserFormComponent from "./../components/UserFormComponent.vue";
 import UserListComponent from "./../components/UserListComponent.vue";
 import { User } from "../models/user.model";
-import { IKeyValue } from "../models/interfaces/key-value.interface";
+import { IKeyValue, UserDto } from "../models/interfaces/index";
+
+import axios from "axios";
+axios.defaults.baseURL = "https://http-vue-3f9db-default-rtdb.firebaseio.com/";
 
 @Component({
     components: {
@@ -56,19 +58,80 @@ export default class Home extends Vue {
         return {
             title: "Listes d'utilisateurs",
             firstListTitle: "First list",
-            userList: [
-                { name: "Florian", age: 28, id: this.getRndInteger() },
-                { name: "Gwen", age: 31, id: this.getRndInteger() },
-                { name: "Matthias", age: 28, id: this.getRndInteger() },
-                { name: "Patty", age: 29, id: this.getRndInteger() },
-            ],
+            userList: [],
             user: new User({}),
             selectedUsers: {},
         };
     }
 
     public get selectedCount(): number {
-        return Object.keys({...this.selectedUsers}).filter(key=> this.selectedUsers[key]).length
+        return Object.keys({ ...this.selectedUsers }).filter(
+            (key) => this.selectedUsers[key]
+        ).length;
+    }
+
+    // LIFE CYCLE HOOKS
+
+    created() {
+        this.getUsers();
+    }
+
+    // SERVICES
+
+    private addUser(data: User) {
+        axios
+            .post("/user.json", data)
+            .then(() => this.getUsers())
+            .catch((err) => console.log("err: ", err));
+    }
+
+    private getUsers() {
+        axios
+            .get("/user.json")
+            .then((res) => {
+                if (!res || !res.data) {
+                    this.userList = [];
+                    return;
+                }
+                const newUserList = this.userListMappingFromDto(res.data);
+                this.userList = [...newUserList];
+            })
+            .catch((err) => console.log("err: ", err));
+    }
+
+    public onDeleteUser(user: User): void {
+        axios
+            .delete(`/user/${user.id}.json`)
+            .then(() => this.getUsers())
+            .catch((err) => console.log("err: ", err));
+    }
+
+    public editUser(userToEdit: User): void {
+        axios
+            .put(`/user/${userToEdit.id}.json`, {
+                name: userToEdit.name,
+                age: userToEdit.age,
+            })
+            .then(() => {
+                this.getUsers();
+                this.user = new User({});
+            })
+            .catch((err) => console.log("err: ", err));
+    }
+
+    // MAPPINGS
+
+    private userListMappingFromDto(data: UserDto): User[] {
+        return Object.keys(data).reduce((acc: User[], curr: string) => {
+            acc.push(
+                new User({
+                    id: curr,
+                    name: data[curr].name,
+                    age: data[curr].age,
+                })
+            );
+            return acc;
+        }, []);
     }
 
     // METHODS
@@ -88,44 +151,8 @@ export default class Home extends Vue {
         this.addUser(newUser);
     }
 
-    private getRndInteger(): string {
-        return Math.floor(Math.random() * 100000000000000000000).toString();
-    }
-
-    public deleteUsers(): void {
-        const idsToDelete: string[] = Object.keys(this.selectedUsers).filter(
-            (v) => this.selectedUsers[v]
-        );
-        if (idsToDelete.length > 0) {
-            this.userList = idsToDelete.reduce(
-                (acc: User[], curr: string) => acc.filter((u) => u.id != curr),
-                this.userList
-            );
-        }
-    }
-
-    public onEditUserChanges(userToEdit: User): void {
+    public onEditUser(userToEdit: User): void {
         this.user = new User({ ...userToEdit });
-    }
-
-    public editUser(userToEdit: User): void {
-        this.userList = this.userList.reduce((acc: User[], curr: User) => {
-            if (userToEdit.id === curr.id) {
-                acc.push(userToEdit);
-            } else {
-                acc.push(curr);
-            }
-            return [...acc];
-        }, []);
-        this.user = new User({});
-    }
-
-    public addUser(newUser: User): void {
-        const userToAdd = {
-            ...newUser,
-            id: this.getRndInteger(),
-        };
-        this.userList.push(userToAdd);
     }
 
     private isUserAlreadyExist(newUser: User): boolean {
