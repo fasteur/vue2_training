@@ -61,10 +61,12 @@ export default class UserFormComponent extends Vue {
 
     @Emit("formChange")
     public formChange() {
-        return {
+        const formValue = {
             ...this.user,
             ...this.form,
         };
+        formValue.name.toString().trim()
+        return formValue;
     }
 
     // COMPUTED
@@ -78,7 +80,9 @@ export default class UserFormComponent extends Vue {
         if (!this.form.age) {
             this.errors.push('Age is required!');
         }
-
+        if (typeof this.form.age !== 'number' ) {
+            this.errors.push('Age is a number!');
+        }
         return !(this.errors.length > 0);
     }
 
