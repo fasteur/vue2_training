@@ -4,19 +4,6 @@
 
         <b-table class="mx-1" striped hover :fields="fields" :items="userList">
 
-            <!-- <template #head(checkbox)>
-                    <button class="btn btn-outline-primary btn-sm" @click="clearSelected()">Clear</button>
-            </template>
-            <template #cell(checkbox)="data">
-                <input
-                    type="checkbox"
-                    :checked="selectedUsers[data.item.id]"
-                    name="user.name"
-                    id="user.id"
-                    @change="selectUser($event, data.item.id)"
-                />
-            </template> -->
-
             <template #cell(editAndDelete)="data">
                 <div class="d-flex flex-row justify-content-end">
                     <button class="btn btn-outline-primary btn-sm mr-2" type="button" @click="editUserChanges(data.item)">Edit</button>
@@ -45,7 +32,6 @@ export default class UserListComponent extends Vue {
     data() {
         return {
             fields: [
-                // 'checkbox',
                 { key: 'name', sortable: true },
                 { key: 'age', sortable: true },
                 { key: 'editAndDelete', label: '' }
