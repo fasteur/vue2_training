@@ -101,6 +101,5 @@ export default class UserFormComponent extends Vue {
             age: null,
         };
     }
-
 }
 </script>

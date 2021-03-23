@@ -13,42 +13,33 @@
         >
         </UserListComponent>
 
-        <!-- <button
-            :class="{ active: !!selectedCount, disabled: !selectedCount }"
-            class="btn btn-primary"
-            @click="deleteUsers()"
-        >
-            <span v-if="selectedCount > 1">
-                Delete {{ selectedCount }} selected users
-            </span>
-            <span v-else-if="selectedCount === 1">
-                Delete {{ selectedCount }} selected user
-            </span>
-            <span v-else> No selected user to delete </span>
-        </button> -->
-
         <UserFormComponent :user="user" @formChange="changeUser($event)">
         </UserFormComponent>
     </b-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Inject, Vue } from "vue-property-decorator";
+
 import UserFormComponent from "./../components/UserFormComponent.vue";
 import UserListComponent from "./../components/UserListComponent.vue";
-import { User } from "../models/user.model";
-import { IKeyValue, UserDto } from "../models/interfaces/index";
-
-import axios from "axios";
-axios.defaults.baseURL = "https://http-vue-3f9db-default-rtdb.firebaseio.com/";
+import { User } from "../models/index";
+import { IKeyValue } from "./../models/interfaces/key-value.interface";
+import { UserDto } from "./../models/interfaces/dto/user-dto.interface";
+import UserService from '../services/user.service.vue';
 
 @Component({
     components: {
         UserFormComponent,
         UserListComponent,
-    },
+    }
 })
 export default class Home extends Vue {
+
+    // SERVICES
+    @Inject() private userService!: UserService;
+
+    // DATAS
     public title!: string;
     public userList!: User[];
     public user!: User;
@@ -64,6 +55,7 @@ export default class Home extends Vue {
         };
     }
 
+    // COMPUTED
     public get selectedCount(): number {
         return Object.keys({ ...this.selectedUsers }).filter(
             (key) => this.selectedUsers[key]
@@ -71,23 +63,20 @@ export default class Home extends Vue {
     }
 
     // LIFE CYCLE HOOKS
-
     created() {
         this.getUsers();
     }
 
-    // SERVICES
 
+    // METHODS
     private addUser(data: User) {
-        axios
-            .post("/user.json", data)
+        this.userService.addUser(data)
             .then(() => this.getUsers())
             .catch((err) => console.log("err: ", err));
     }
 
     private getUsers() {
-        axios
-            .get("/user.json")
+        this.userService.getUsers()
             .then((res) => {
                 if (!res || !res.data) {
                     this.userList = [];
@@ -100,26 +89,19 @@ export default class Home extends Vue {
     }
 
     public onDeleteUser(user: User): void {
-        axios
-            .delete(`/user/${user.id}.json`)
+        this.userService.deleteUser(user)
             .then(() => this.getUsers())
             .catch((err) => console.log("err: ", err));
     }
 
     public editUser(userToEdit: User): void {
-        axios
-            .put(`/user/${userToEdit.id}.json`, {
-                name: userToEdit.name,
-                age: userToEdit.age,
-            })
+        this.userService.editUser(userToEdit)
             .then(() => {
                 this.getUsers();
                 this.user = new User({});
             })
             .catch((err) => console.log("err: ", err));
     }
-
-    // MAPPINGS
 
     private userListMappingFromDto(data: UserDto): User[] {
         return Object.keys(data).reduce((acc: User[], curr: string) => {
@@ -133,8 +115,6 @@ export default class Home extends Vue {
             return acc;
         }, []);
     }
-
-    // METHODS
 
     public onSelectedChanges(newSelectedUsers: IKeyValue): void {
         this.selectedUsers = { ...newSelectedUsers };
