@@ -67,8 +67,8 @@ export default class Home extends Vue {
         this.getUsers();
     }
 
-
     // METHODS
+    
     private addUser(data: User) {
         this.userService.addUser(data)
             .then(() => this.getUsers())
