@@ -10,7 +10,7 @@ const interceptorsResponse = myAxios.interceptors.response;
 const interceptorsRequest = myAxios.interceptors.request;
 
 interceptorsResponse.use((res) => {
-    if (res && res.status && res.status !== 600) {
+    if (res && res.status && res.status !== 200) {
         const toastService: ToastService = new ToastService();
         (toastService as any).showToast(
             `${i18n.t("TOAST.ERROR.MESSAGE", {status: res.status})}`, 

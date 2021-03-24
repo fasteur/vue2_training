@@ -1,7 +1,7 @@
 <template>
     <b-form class="my-5" @submit.prevent="submitForm()">
 
-        <h3 class="text-dark">{{ $t("USER_FORM.TITLE")}}</h3>
+        <h3 class="text-dark">{{ $t("USER_FORM.TITLE") }}</h3>
         
         <b-container class="my-4" fluid>
             <b-row>
@@ -16,7 +16,7 @@
                         variant="primary"
                         :class="{'active': verifyForm, 'disabled': !verifyForm}"
                         type="submit">
-                        {{ $t("GENERAL.SUBMIT")}}
+                        {{ $t("GENERAL.SUBMIT") }}
                     </b-button>
                 </b-col>
             </b-row>
