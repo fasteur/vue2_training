@@ -1,9 +1,8 @@
 <template>
     <b-container class="home">
-        <h1 class="text-center mt-3 text-dark">{{ title }}</h1>
+        <h1 class="text-center my-5 text-dark">{{ $t("USER_LIST.TITLE") }}</h1>
 
         <UserListComponent
-            :title="firstListTitle"
             :user-list="userList"
             :selected-users="selectedUsers"
             @selectedChanges="onSelectedChanges($event)"
@@ -47,8 +46,6 @@ export default class Home extends Vue {
 
     data() {
         return {
-            title: "Listes d'utilisateurs",
-            firstListTitle: "First list",
             userList: [],
             user: new User({}),
             selectedUsers: {},
