@@ -7,14 +7,16 @@ export default class ToastService extends Vue {
 
     public showToast(
         message: string,
+        title: string,
         variant = 'danger',
         append = false
     ) {
-         this.$bvToast.toast(`${message}`, {
-          title: 'Error',
-          autoHideDelay: 5000,
-          variant: variant,
-          appendToast: append,
+
+        this.$bvToast.toast(`${message}`, {
+            title,
+            autoHideDelay: 5000,
+            variant: variant,
+            appendToast: append,
         })
     }
 
