@@ -11,8 +11,7 @@
   "GENERAL": {
     "DELETE": "Supprimer",
     "EDIT": "Éditer",
-    "SUBMIT": "Soumettre",
-    "RESET": "Réinitialiser"
+    "SUBMIT": "Soumettre"
   },
   "TOAST": {
     "ERROR": {
