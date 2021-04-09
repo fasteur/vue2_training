@@ -11,7 +11,8 @@
   "GENERAL": {
     "DELETE": "Delete",
     "EDIT": "Edit",
-    "SUBMIT": "Submit"
+    "SUBMIT": "Submit",
+    "RESET": "Reset"
   },
   "TOAST": {
     "ERROR": {
